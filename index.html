@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10243a">
+  <link rel="icon" href="assets/logo.png">
   <title>Shyam Metalics | Coke Oven Intranet</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="loginView" class="login-wrap">
     <section class="login-card">
-      <div class="brand-mark">SM</div>
-      <p class="eyebrow">SHYAM METALICS</p>
+      <img class="logo-login" src="assets/logo.png" alt="Shyam Metalics - Ore to Metal">
       <h1>Coke Oven Department</h1>
       <p class="muted">Departmental Intranet Portal</p>
       <form id="loginForm">
@@ -26,7 +26,7 @@
 
   <div id="appView" class="app hidden">
     <aside class="sidebar">
-      <div class="side-brand"><div class="brand-mark small">SM</div><div><b>SHYAM METALICS</b><small>COKE OVEN</small></div></div>
+      <div class="side-brand"><span class="logo-chip"><img src="assets/logo.png" alt="Shyam Metalics"></span><small>COKE OVEN DEPARTMENT</small></div>
       <nav>
         <button class="nav-link active" data-page="dashboard">▦ <span>Dashboard</span></button>
         <button class="nav-link" data-page="documents">▤ <span>Document Repository</span></button>
@@ -102,7 +102,7 @@
 
       <section id="page-admin" class="page hidden">
         <div class="section-intro"><div><h3>Administration</h3><p>User list and system access overview. User creation is managed through the private data repository in this starter.</p></div></div>
-        <div class="notice">For security, add or deactivate users by updating <code>database/users.json</code> in the private data repository. A dedicated audited user-management API should be added before production rollout.</div>
+        <div class="notice">Users are managed in the Cloudflare Worker variable <code>USERS</code> (Worker → Settings → Variables and Secrets). Edit it and save to add, change or remove users.</div>
         <div id="userList" class="data-list"></div>
       </section>
       <footer>Shyam Metalics · Coke Oven Department · Internal use only</footer>

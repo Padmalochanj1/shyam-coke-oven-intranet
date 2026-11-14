@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connection check</title>
+<style>body{font:14px system-ui,Arial;max-width:760px;margin:30px auto;padding:0 16px;color:#172b3d}input{padding:10px;margin:4px 6px 4px 0;border:1px solid #ccd;border-radius:8px}button{padding:10px 16px;background:#1976b9;color:#fff;border:0;border-radius:8px;font-weight:700}
+.r{padding:10px 12px;margin:8px 0;border-radius:8px;border-left:5px solid #999;background:#f3f6fa;white-space:pre-wrap;word-break:break-all}.ok{border-color:#16845b}.bad{border-color:#c23d45;background:#fdebed}</style></head><body>
+<h2>Intranet connection check</h2><p>Enter a valid login and press Run. Your password is not displayed or stored.</p>
+<input id="u" placeholder="username"><input id="p" type="password" placeholder="password"><button id="go">Run check</button><div id="out"></div>
+<script src="js/config.js"></script><script>
+const out=document.getElementById("out"),API=(window.APP_CONFIG||{}).API_BASE_URL||"";
+const add=(ok,t)=>{const d=document.createElement("div");d.className="r "+(ok?"ok":"bad");d.textContent=(ok?"✔ ":"✘ ")+t;out.append(d);};
+async function call(p,o={}){try{const r=await fetch(API+p,o);let b;try{b=await r.json()}catch{b="(not JSON)"}return{s:r.status,b}}catch(e){return{s:0,b:"Network/CORS error: "+e.message}}}
+document.getElementById("go").onclick=async()=>{out.innerHTML="";
+ add(true,"Page origin: "+location.origin+"\nWorker URL in config.js: "+API);
+ if(!/^https:\/\/[^/]+$/.test(API)||/REPLACE/.test(API))add(false,"Worker URL looks wrong: it must start with https:// , have no trailing slash or path, and not be the placeholder.");
+ try{sessionStorage.setItem("t","1");add(sessionStorage.getItem("t")==="1","Browser session storage works")}catch(e){add(false,"Browser session storage is blocked: "+e.message)}
+ let r=await call("/api/health");add(r.s===200,"1. Worker health ("+r.s+"): "+JSON.stringify(r.b));if(r.s!==200)return;
+ r=await call("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:document.getElementById("u").value.trim(),password:document.getElementById("p").value})});
+ const tk=r.b&&r.b.token;add(r.s===200&&!!tk,"2. Login ("+r.s+"): "+(tk?"token received, length "+tk.length+", parts "+tk.split(".").length:JSON.stringify(r.b)));if(!tk)return;
+ const H={headers:{Authorization:"Bearer "+tk}};
+ for(const p of["/api/me","/api/documents","/api/safety"]){r=await call(p,H);add(r.s===200,"3. "+p+" ("+r.s+"): "+JSON.stringify(r.b).slice(0,200))}
+ add(true,"Finished. If every line has ✔ the Worker and login are fine; send me the first ✘ line.")};
+</script></body></html>

@@ -1,4 +1,3 @@
-
 const API = window.APP_CONFIG.API_BASE_URL;
 let currentUser = null;
 let docsCache = [];
@@ -43,12 +42,12 @@ document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",(
 
 $("loginForm").addEventListener("submit",async e=>{
   e.preventDefault(); showMessage("loginMessage","Signing in…",true);
-  try{const r=await api("/api/login",{method:"POST",body:JSON.stringify({username:$("username").value.trim(),password:$("password").value})});sessionStorage.setItem("sm_session",r.token);showApp(r.user);}
+  try{const r=await api("/api/login",{method:"POST",body:JSON.stringify({username:$("username").value.trim(),password:$("password").value})});window.__tok=r.token;try{sessionStorage.setItem("sm_session",r.token);}catch{}showApp(r.user);}
   catch(err){showMessage("loginMessage",err.message);}
 });
-$("logoutBtn").addEventListener("click",()=>{sessionStorage.removeItem("sm_session");currentUser=null;$("appView").classList.add("hidden");$("loginView").classList.remove("hidden");$("password").value="";});
+$("logoutBtn").addEventListener("click",()=>{window.__tok=null;try{sessionStorage.removeItem("sm_session");}catch{}currentUser=null;$("appView").classList.add("hidden");$("loginView").classList.remove("hidden");$("password").value="";});
 async function authorized(path,options={}){
-  const token=sessionStorage.getItem("sm_session");
+  const token=tok();
   return api(path,{...options,headers:{Authorization:`Bearer ${token}`,...(options.headers||{})}});
 }
 async function refreshAll(){
@@ -57,7 +56,7 @@ async function refreshAll(){
     docsCache=d.documents||[]; safetyCache=s.reports||[];
     renderDocuments();renderSafety();renderApprovals();renderManagerSafety();renderDashboard();
     if(isHod()) renderUsers();
-  }catch(e){console.error(e);if(/session|token|unauthorized/i.test(e.message)) $("logoutBtn").click();}
+  }catch(e){console.error(e);toast(e.message,true);if(/session|token|unauthorized/i.test(e.message)) $("logoutBtn").click();}
 }
 function renderDashboard(){
   $("statPublished").textContent=docsCache.filter(x=>x.status==="published").length;
@@ -86,7 +85,7 @@ async function printValidDocument(id){
  printTab.document.write(`<!doctype html><html><head><title>Preparing valid document</title></head><body style="font:16px Arial;padding:32px;color:#263445">Preparing watermarked valid document…</body></html>`);
  try{
   if(!window.PDFLib)throw new Error("PDF processing library did not load. Refresh the page and retry.");
-  const token=sessionStorage.getItem("sm_session");
+  const token=tok();
   const response=await fetch(doc.fileUrl,{headers:{Authorization:`Bearer ${token}`},credentials:"omit"});
   if(!response.ok)throw new Error(`Unable to retrieve document (${response.status}). Please sign in again or contact the administrator.`);
   const sourceBytes=await response.arrayBuffer();
@@ -210,7 +209,7 @@ async function renderUsers(){
  try{const r=await authorized("/api/admin/users");$("userList").innerHTML=(r.users||[]).map(u=>`<article class="data-card"><div><h4>${esc(u.displayName)}</h4><p>${esc(u.username)} · ${esc(u.department)}</p><div class="data-meta"><span class="pill">${esc(u.role)}</span><span class="pill ${u.active?"green":"red"}">${u.active?"Active":"Inactive"}</span></div></div></article>`).join("")||`<div class="empty">No users found.</div>`;}
  catch(e){$("userList").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
 }
-(async()=>{const token=sessionStorage.getItem("sm_session");if(!token)return;try{const r=await api("/api/me",{headers:{Authorization:`Bearer ${token}`}});showApp(r.user);}catch{sessionStorage.removeItem("sm_session");}})();
+(async()=>{const token=tok();if(!token)return;try{const r=await api("/api/me",{headers:{Authorization:`Bearer ${token}`}});showApp(r.user);}catch{sessionStorage.removeItem("sm_session");}})();
 
 /* ===== v2 additions ===== */
 window.alert=m=>toast(m,true);
@@ -220,7 +219,7 @@ function closeModal(){$("modal").classList.add("hidden");$("modalBox").innerHTML
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
 function askRemarks(title,required,onOk){openModal(`<h3>${title}</h3><textarea id="rmk" rows="3" placeholder="Remarks${required?" (required)":" (optional)"}"></textarea><button class="primary" id="rmkOk">Confirm</button>`);
  $("rmkOk").onclick=async()=>{const v=$("rmk").value.trim();if(required&&!v)return toast("Remarks are required",true);try{await onOk(v);closeModal();await refreshAll();}catch(e){toast(e.message,true);}};}
-async function previewFile(url,kind){try{const t=sessionStorage.getItem("sm_session"),r=await fetch(url,{headers:{Authorization:"Bearer "+t}});if(!r.ok)throw new Error("Unable to open file ("+r.status+")");const u=URL.createObjectURL(await r.blob());openModal(kind==="pdf"?`<iframe src="${u}"></iframe>`:`<img src="${u}">`);}catch(e){toast(e.message,true);}}
+async function previewFile(url,kind){try{const t=tok(),r=await fetch(url,{headers:{Authorization:"Bearer "+t}});if(!r.ok)throw new Error("Unable to open file ("+r.status+")");const u=URL.createObjectURL(await r.blob());openModal(kind==="pdf"?`<iframe src="${u}"></iframe>`:`<img src="${u}">`);}catch(e){toast(e.message,true);}}
 const b64=u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode(...u8.subarray(i,i+8192));return btoa(s);};
 async function prepPdf(file){
  if(!window.PDFLib)throw new Error("PDF library did not load. Refresh and retry.");
@@ -291,3 +290,5 @@ async function officeToPdf(file){
   if(first)throw new Error("The spreadsheet is empty.");out=d.output("arraybuffer");}
  toast("Converted "+file.name+" to PDF");return out;
 }
+
+function tok(){try{return window.__tok||sessionStorage.getItem("sm_session");}catch{return window.__tok||null;}}

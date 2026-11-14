@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <title>Shyam Metalics | Coke Oven Intranet</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="loginView" class="login-wrap">
+    <section class="login-card">
+      <div class="brand-mark">SM</div>
+      <p class="eyebrow">SHYAM METALICS</p>
+      <h1>Coke Oven Department</h1>
+      <p class="muted">Departmental Intranet Portal</p>
+      <form id="loginForm">
+        <label>Username<input id="username" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary full" type="submit">Sign in</button>
+        <p id="loginMessage" class="message" role="status"></p>
+      </form>
+      <small>Authorized personnel only</small>
+    </section>
+  </div>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="side-brand"><div class="brand-mark small">SM</div><div><b>SHYAM METALICS</b><small>COKE OVEN</small></div></div>
+      <nav>
+        <button class="nav-link active" data-page="dashboard">▦ <span>Dashboard</span></button>
+        <button class="nav-link" data-page="documents">▤ <span>Document Repository</span></button>
+        <button class="nav-link" data-page="safety">⚠ <span>Safety Reporting</span></button>
+        <button class="nav-link manager-only hidden" data-page="reports">▥ <span>Safety Monitoring</span></button>
+        <button class="nav-link hod-only hidden" data-page="approvals">✓ <span>Document Approvals</span></button>
+        <button class="nav-link hod-only hidden" data-page="admin">⚙ <span>Administration</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span class="online-dot"></span> Secure session <button id="logoutBtn" class="logout">Sign out ↗</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><p class="eyebrow">DEPARTMENT WORKSPACE</p><h2 id="pageTitle">Dashboard</h2></div>
+        <div class="profile"><div class="avatar" id="avatar">U</div><div><b id="profileName">User</b><small id="profileRole">USER</small></div></div>
+      </header>
+
+      <section id="page-dashboard" class="page">
+        <div class="welcome"><div><p class="eyebrow light">SHYAM METALICS · COKE OVEN</p><h1>Department Overview</h1><p>Documents, approvals and workplace safety in one place.</p></div><div class="welcome-symbol">SM</div></div>
+        <div class="stats">
+          <article class="stat-card"><span>Published Documents</span><strong id="statPublished">—</strong><small>Approved repository</small></article>
+          <article class="stat-card"><span>Pending Approvals</span><strong id="statPending">—</strong><small>Awaiting HOD review</small></article>
+          <article class="stat-card"><span>Open Safety Reports</span><strong id="statOpen">—</strong><small>Require action</small></article>
+          <article class="stat-card"><span>Closed Safety Reports</span><strong id="statClosed">—</strong><small>Rectification completed</small></article>
+        </div>
+        <div class="two-col" style="margin-bottom:16px"><article class="panel"><div class="panel-head"><h3>Open safety reports by responsibility</h3></div><div id="chartBars" class="bars"></div></article><article class="panel"><div class="panel-head"><h3>Recent activity</h3></div><div id="recentList" class="recent"></div></article></div>
+        <div class="two-col">
+          <article class="panel"><div class="panel-head"><h3>Quick Actions</h3></div><div class="quick-actions"><button class="action-tile" data-goto="documents">＋<b>Submit Document</b><small>Upload for HOD approval</small></button><button class="action-tile" data-goto="safety">⚑<b>Report Safety Observation</b><small>Unsafe act or condition</small></button></div></article>
+          <article class="panel"><div class="panel-head"><h3>Workflow</h3></div><ol class="workflow"><li><b>Submit</b><span>Upload document or report observation</span></li><li><b>Review / Assign</b><span>HOD reviews documents; Manager assigns safety action</span></li><li><b>Approve / Close</b><span>Approved documents are published; safety action is closed</span></li></ol></article>
+        </div>
+      </section>
+
+      <section id="page-documents" class="page hidden">
+        <div class="section-intro"><div><h3>Central Document Repository</h3><p>Controlled access to current department documents.</p></div><button class="primary" id="showDocForm">＋ Submit Document</button></div>
+        <form id="docForm" class="panel form-grid hidden">
+          <h3 class="span-2">Submit a document for HOD approval</h3>
+          <label>Document category<select id="docCategory" required><option>SOP</option><option>HIRA</option><option>SMP</option><option>Electrical Drawing</option><option>Maintenance Procedure</option><option>Checklist / Format</option><option>Other</option></select></label>
+          <label>Document title<input id="docTitle" required maxlength="140"></label>
+          <label>Document number<input id="docNumber" maxlength="80"></label>
+          <label>Revision<input id="docRevision" placeholder="00" required maxlength="20"></label>
+          <label class="span-2">File (drag &amp; drop PDF, image, Word or Excel — converted to PDF, compressed, date-time stamped, saved as PDF)<input id="docFile" type="file" accept="application/pdf,image/*,.docx,.xlsx,.xls,.csv" required><small>Accepted: PDF, image, Word (.docx), Excel (.xlsx/.xls/.csv). Limit 8 MB after conversion.</small></label>
+          <div class="span-2 form-actions"><button class="primary" type="submit">Upload for approval</button><button class="secondary" type="button" id="cancelDoc">Cancel</button><span id="docMessage" class="message"></span></div>
+        </form>
+        <div id="docChips" class="chips"></div><div class="toolbar"><input id="docSearch" placeholder="Search title, number or category"><select id="docFilter"><option value="published">Published documents</option><option value="mine">My submissions</option><option value="all">All visible to me</option></select></div>
+        <div id="documentList" class="data-list"></div>
+      </section>
+
+      <section id="page-safety" class="page hidden">
+        <div class="section-intro"><div><h3>Site Safety Reporting</h3><p>Report unsafe acts and unsafe conditions with photographic evidence.</p></div><button class="primary" id="showSafetyForm">＋ New Safety Report</button></div>
+        <form id="safetyForm" class="panel form-grid hidden">
+          <h3 class="span-2">New safety observation</h3>
+          <label>Report type<select id="safetyType" required><option>Unsafe Act</option><option>Unsafe Condition</option></select></label>
+          <label>Location / equipment<input id="safetyLocation" placeholder="e.g. Battery, Pusher Car, Conveyor" required></label>
+          <label>Responsibility<select id="safetyDept" required><option>Operation</option><option>Electrical</option><option>Mechanical</option></select></label>
+          <label>Priority<select id="safetyPriority"><option>Medium</option><option>Low</option><option>High</option></select></label>
+          <label class="span-2">Observation / description<textarea id="safetyDescription" required rows="3" maxlength="2000"></textarea></label>
+          <label class="span-2">Photograph<input id="safetyImage" type="file" accept="image/*"><small>Drag &amp; drop supported. Image is resized, compressed and converted to PNG. Max 8 MB before processing.</small></label>
+          <div class="span-2 form-actions"><button class="primary" type="submit">Submit Safety Report</button><button class="secondary" type="button" id="cancelSafety">Cancel</button><span id="safetyMessage" class="message"></span></div>
+        </form>
+        <div class="toolbar"><input id="safetySearch" placeholder="Search report ID, location or description"><select id="safetyFilter"><option value="mine">My reports</option><option value="all">All reports I can access</option></select></div>
+        <div id="safetyList" class="data-list"></div>
+      </section>
+
+      <section id="page-reports" class="page hidden">
+        <div class="section-intro"><div><h3>Safety Monitoring</h3><p>Manager workspace for reports assigned to your responsibility.</p></div><button class="secondary" id="refreshSafety">↻ Refresh</button></div>
+        <div id="monChips" class="chips"></div><div id="managerSafetyList" class="data-list"></div>
+      </section>
+
+      <section id="page-approvals" class="page hidden">
+        <div class="section-intro"><div><h3>Document Approval Centre</h3><p>Review submitted documents before final publication.</p></div><button class="secondary" id="refreshDocs">↻ Refresh</button></div>
+        <div id="approvalList" class="data-list"></div>
+      </section>
+
+      <section id="page-admin" class="page hidden">
+        <div class="section-intro"><div><h3>Administration</h3><p>User list and system access overview. User creation is managed through the private data repository in this starter.</p></div></div>
+        <div class="notice">For security, add or deactivate users by updating <code>database/users.json</code> in the private data repository. A dedicated audited user-management API should be added before production rollout.</div>
+        <div id="userList" class="data-list"></div>
+      </section>
+      <footer>Shyam Metalics · Coke Oven Department · Internal use only</footer>
+    </main>
+  </div>
+  <div id="toasts"></div><div id="modal" class="modal hidden"><div class="modal-box" id="modalBox"></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -4,11 +4,11 @@
 <h2>Intranet connection check</h2><p>Enter a valid login and press Run. Your password is not displayed or stored.</p>
 <input id="u" placeholder="username"><input id="p" type="password" placeholder="password"><button id="go">Run check</button><div id="out"></div>
 <script src="js/config.js"></script><script>
-const out=document.getElementById("out"),API=(window.APP_CONFIG||{}).API_BASE_URL||"";
+const out=document.getElementById("out"),RAW=(window.APP_CONFIG||{}).API_BASE_URL||"",API=RAW.trim().replace(/\/+$/,"");
 const add=(ok,t)=>{const d=document.createElement("div");d.className="r "+(ok?"ok":"bad");d.textContent=(ok?"✔ ":"✘ ")+t;out.append(d);};
 async function call(p,o={}){try{const r=await fetch(API+p,o);let b;try{b=await r.json()}catch{b="(not JSON)"}return{s:r.status,b}}catch(e){return{s:0,b:"Network/CORS error: "+e.message}}}
 document.getElementById("go").onclick=async()=>{out.innerHTML="";
- add(true,"Page origin: "+location.origin+"\nWorker URL in config.js: "+API);
+ add(true,"Page origin: "+location.origin+"\nWorker URL in config.js: "+RAW);
  if(!/^https:\/\/[^/]+$/.test(API)||/REPLACE/.test(API))add(false,"Worker URL looks wrong: it must start with https:// , have no trailing slash or path, and not be the placeholder.");
  try{sessionStorage.setItem("t","1");add(sessionStorage.getItem("t")==="1","Browser session storage works")}catch(e){add(false,"Browser session storage is blocked: "+e.message)}
  let r=await call("/api/health");add(r.s===200,"1. Worker health ("+r.s+"): "+JSON.stringify(r.b));if(r.s!==200)return;

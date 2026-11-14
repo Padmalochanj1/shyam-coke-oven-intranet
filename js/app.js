@@ -1,4 +1,4 @@
-const API = window.APP_CONFIG.API_BASE_URL;
+const API = String(window.APP_CONFIG.API_BASE_URL).trim().replace(/\/+$/, "");
 let currentUser = null;
 let docsCache = [];
 let safetyCache = [];
